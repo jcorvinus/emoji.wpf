@@ -31,60 +31,6 @@ using Controls = System.Windows.Controls;
 
 namespace Emoji.Wpf
 {
-    public sealed class TextSelection : TextRange
-    {
-        internal TextSelection(TextPointer start, TextPointer end)
-          : base(start, end) { }
-
-        /// <summary>
-        /// Override selection to text conversion in order to convert back all
-        /// EmojiInline instances to their equivalent UTF-8 sequences.
-        /// </summary>
-        public new string Text
-        {
-            get
-            {
-                var buf = new StringBuilder();
-                var is_first_paragraph = true;
-
-                for (TextPointer p = Start, next = null;
-                     p != null && p.CompareTo(End) < 0;
-                     p = next)
-                {
-                    next = p.GetNextContextPosition(LogicalDirection.Forward);
-                    if (next == null)
-                        break;
-
-                    switch (p.GetPointerContext(LogicalDirection.Forward))
-                    {
-                        case TextPointerContext.ElementStart:
-                            var element = p.GetAdjacentElement(LogicalDirection.Forward);
-                            if (element is EmojiInline emoji)
-                                buf.Append(emoji.Text);
-                            else if (element is Paragraph && !is_first_paragraph)
-                                buf.Append('\n');
-                            break;
-
-                        case TextPointerContext.ElementEnd:
-                            if (p.GetAdjacentElement(LogicalDirection.Forward) is Paragraph)
-                                is_first_paragraph = false;
-                            break;
-
-                        case TextPointerContext.EmbeddedElement:
-                            break;
-
-                        case TextPointerContext.Text:
-                            // Get text from the Run but don’t go past end
-                            buf.Append(new TextRange(p, next.CompareTo(End) < 0 ? next : End).Text);
-                            break;
-                    }
-                }
-
-                return buf.ToString();
-            }
-        }
-    }
-
     public enum BBCodeMarkupVisibility
     {
         Visible,
