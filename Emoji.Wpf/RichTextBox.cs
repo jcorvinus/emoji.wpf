@@ -11,6 +11,7 @@
 //
 
 using Stfu.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -61,6 +62,9 @@ namespace Emoji.Wpf
                             break;
                         case TextPointerContext.ElementEnd:
                         case TextPointerContext.EmbeddedElement:
+                            var nextInsertionPosition = p.GetNextInsertionPosition(LogicalDirection.Forward);
+                            if (nextInsertionPosition != null && new TextRange(p, nextInsertionPosition).Text.Contains(Environment.NewLine))
+                                buf.AppendLine();
                             break;
                         case TextPointerContext.Text:
                             // Get text from the Run but don’t go past end

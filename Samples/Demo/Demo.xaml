@@ -149,11 +149,12 @@
                         </Grid.RowDefinitions>
                         <emoji:TextBox Grid.Row="0" FontSize="10" Margin="5" Foreground="DarkMagenta" x:Name="EmojiTextBox"
                                        IsReadOnly="{Binding IsChecked, ElementName=ReadOnlyCheckBox}"
-                                       Text="{Binding Text, ElementName=WpfTextBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                        <CheckBox Grid.Row="1" VerticalAlignment="Center" Margin="4 0"
+                                       Text="{Binding Text, ElementName=WpfTextBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap"/>
+                        <!--<CheckBox Grid.Row="1" VerticalAlignment="Center" Margin="4 0"
                                   x:Name="ReadOnlyCheckBox" IsChecked="False">
                             <TextBlock Margin="0 2 0 0" Text="Read-only"/>
-                        </CheckBox>
+                        </CheckBox>-->
+                        <Button Grid.Row="1" x:Name="ShowTextBoxTextButton" Content="Show Text" Margin="4" HorizontalAlignment="Left"/>
                     </Grid>
                 </GroupBox>
                 <GroupBox Grid.Row="1" Header="wpf:TextBox" Margin="4 0 4 4">

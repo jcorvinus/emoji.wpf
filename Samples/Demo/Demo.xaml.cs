@@ -42,6 +42,12 @@ namespace Demo
 
             EditorPicker.Picked += (o, e) =>
                 EmojiRichTextBox.CaretPosition.InsertTextInRun(e.Emoji);
+
+            ShowTextBoxTextButton.Click += (o, e) =>
+            {
+                string textToShow = EmojiTextBox.Text;
+                MessageBox.Show(textToShow, "TextBox Text");
+            };
         }
     }
 }
