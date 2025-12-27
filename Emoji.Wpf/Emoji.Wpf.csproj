@@ -62,7 +62,7 @@
   </UsingTask>
 
   <UsingTask TaskName="HLSLShaderCompile"
-             AssemblyFile="$(PkgJeremyAnsel_HLSL_Targets)\tools\net6.0\JeremyAnsel.HLSL.Targets.dll" />
+             AssemblyFile="$(PkgJeremyAnsel_HLSL_Targets)\tools\net48\JeremyAnsel.HLSL.Targets.dll" />
 
   <Target Name="CompressResources" BeforeTargets="BeforeBuild">
     <GZipTask InputFiles="@(LargeResources)" OutDir="$(OutputPath)">
