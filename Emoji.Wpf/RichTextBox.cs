@@ -87,6 +87,13 @@ namespace Emoji.Wpf
             Selection = new TextSelection(Document.ContentStart, Document.ContentStart);
         }
 
+        private bool isCustomFlowDocument;
+        public void SetCustomFlowDocument(FlowDocument customDoc)
+        {
+            isCustomFlowDocument = true;
+            Document = customDoc;
+        }
+
         protected override void OnSelectionChanged(RoutedEventArgs e)
         {
             base.OnSelectionChanged(e);
@@ -182,36 +189,40 @@ namespace Emoji.Wpf
 
             m_pending_change = true;
 
-            base.OnTextChanged(e);
-
-            // Prevent our operation from polluting the undo buffer
-            BeginChange();
-
-            foreach (var change in e.Changes.Where(c => c.AddedLength > 0).Reverse())
+            if (!isCustomFlowDocument)
             {
-                // FIXME: when using keyboard input methods, characters are received one by one.
-                // We need to backtrack to the possible beginning of the emoji to make sure we
-                // perform a full substitution. The below code works in simple cases, but will
-                // not work if a substitution was already performed before the end of the emoji.
-                int start = change.Offset, end = start + change.AddedLength;
-                if (start == m_last_change_end)
-                    start = m_last_change_start;
-                m_last_change_start = start;
-                m_last_change_end = end;
 
-                var range = new TextRange(Document.ContentStart.GetPositionAtOffset(start),
-                                          Document.ContentStart.GetPositionAtOffset(end));
+                base.OnTextChanged(e);
 
-                FlowDocumentExtensions.SubstituteGlyphsInRange(range,
-                    Document.FontSize, Document.Foreground, this,
-                    (ColonSyntax ? SubstituteOptions.ColonSyntax : SubstituteOptions.None) |
-                    (ColorBlend ? SubstituteOptions.ColorBlend : SubstituteOptions.None));
+                // Prevent our operation from polluting the undo buffer
+                BeginChange();
+
+                foreach (var change in e.Changes.Where(c => c.AddedLength > 0).Reverse())
+                {
+                    // FIXME: when using keyboard input methods, characters are received one by one.
+                    // We need to backtrack to the possible beginning of the emoji to make sure we
+                    // perform a full substitution. The below code works in simple cases, but will
+                    // not work if a substitution was already performed before the end of the emoji.
+                    int start = change.Offset, end = start + change.AddedLength;
+                    if (start == m_last_change_end)
+                        start = m_last_change_start;
+                    m_last_change_start = start;
+                    m_last_change_end = end;
+
+                    var range = new TextRange(Document.ContentStart.GetPositionAtOffset(start),
+                                              Document.ContentStart.GetPositionAtOffset(end));
+
+                    FlowDocumentExtensions.SubstituteGlyphsInRange(range,
+                        Document.FontSize, Document.Foreground, this,
+                        (ColonSyntax ? SubstituteOptions.ColonSyntax : SubstituteOptions.None) |
+                        (ColorBlend ? SubstituteOptions.ColorBlend : SubstituteOptions.None));
+                }
+
+                EndChange();
+
+                // FIXME: make this call lazy inside Text.get()?
+                SetValue(TextProperty, new TextSelection(Document.ContentStart, Document.ContentEnd).Text);
             }
-
-            EndChange();
-
-            // FIXME: make this call lazy inside Text.get()?
-            SetValue(TextProperty, new TextSelection(Document.ContentStart, Document.ContentEnd).Text);
 
             m_pending_change = false;
 #if DEBUG
@@ -230,9 +241,12 @@ namespace Emoji.Wpf
             if (m_pending_change)
                 return;
 
-            Document.Blocks.Clear();
-            Document.Blocks.Add(new Paragraph(new Run(text)));
-            CaretPosition = Document.ContentEnd;
+            if (!isCustomFlowDocument)
+            {
+                Document.Blocks.Clear();
+                Document.Blocks.Add(new Paragraph(new Run(text)));
+                CaretPosition = Document.ContentEnd;
+            }
         }
 
         private void OnColorBlendChanged(bool color_blend)
