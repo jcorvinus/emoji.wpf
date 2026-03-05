@@ -12,6 +12,7 @@
 //
 
 using System;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -53,6 +54,21 @@ namespace Emoji.Wpf
 
             SubstituteGlyphsInRange(new TextRange(run.ContentStart, run.ContentEnd),
                                     run.FontSize, run.Foreground, run.Parent, options);
+        }
+
+        /// <summary>
+        /// Substitute emoji glyphs with emoji inlines in a text Span
+        /// </summary>
+        public static void SubstituteGlyphs(this Span span) 
+            => SubstituteGlyphs(span, SubstituteOptions.None);
+
+        public static void SubstituteGlyphs(this Span span, SubstituteOptions options)
+        {
+            if (span.Parent == null)
+                throw new Exception("Cannot substitute Emoji glyphs in an unattached Span");
+
+            SubstituteGlyphsInRange(new TextRange(span.ContentStart, span.ContentEnd),
+                                    span.FontSize, span.Foreground, span.Parent, options);
         }
 
         /// <summary>
